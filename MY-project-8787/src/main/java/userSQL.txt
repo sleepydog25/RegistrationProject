@@ -34,3 +34,5 @@ CREATE TABLE users (
 
 INSERT INTO users (name, gender, birthday, phone, email, password,uuid)
 VALUES ('John Doe', 'male', '1990-01-01', '0912345678', 'user@example.com', 'Password123','550e8400-e29b-41d4-a716-446655440000');
+
+

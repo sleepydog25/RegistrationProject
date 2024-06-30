@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +42,75 @@
 <link href="assets/css/style.css" rel="stylesheet">
 
 </head>
+<style>
+#progress-container {
+	position: relative;
+	width: 100%;
+}
 
+.progress {
+	height: 30px;
+	margin-bottom: 10px;
+	position: relative;
+}
+
+#progress-bar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#progress-text {
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	color: white;
+	font-weight: bold;
+}
+
+#trophy {
+	position: absolute;
+	right: 0;
+	top: -10px;
+	display: flex;
+	align-items: center;
+}
+
+#trophy img {
+	width: 30px;
+	height: 30px;
+}
+
+.card-title {
+	display: flex;
+	align-items: center;
+}
+
+.card-title img {
+	margin-right: 10px;
+	width: 30px;
+	height: 30px;
+}
+
+<!--
+ranking-->.ranking {
+	display: flex;
+	align-items: baseline;
+}
+
+.ranking .numerator {
+	font-size: 2rem; /* 分子字體較大 */
+}
+
+.ranking .denominator {
+	font-size: 1rem; /* 分母字體較小 */
+	margin-left: 0.5rem;
+}
+</style>
+
+<script>
+    
+    </script>
 <body>
 
 	<!-- ======= Mobile nav toggle button ======= -->
@@ -54,7 +124,7 @@
 				<img src="assets/img/profile-img.jpg" alt=""
 					class="img-fluid rounded-circle">
 				<h1 class="text-light">
-					<a href="./personal-page.html">使用者您好</a>
+					 <a href="./personal-page.html" id="user-name">     </a>
 				</h1>
 			</div>
 
@@ -87,22 +157,36 @@
 					<div class="col-sm-6">
 						<div class="card">
 							<div class="card-body">
-								<h5 class="card-title">積分</h5>
-								<p class="card-text">With supporting text below as a natural
-									lead-in to additional content.</p>
+								<h5 class="card-title">
+									<img src="assets/img/bronze.png" alt="Trophy"> 積分進度
+								</h5>
+								<div id="progress-container">
+									<div class="progress">
+										<div id="progress-bar" class="progress-bar bg-primary"
+											role="progressbar" style="width: 0%;" aria-valuenow="0"
+											aria-valuemin="0" aria-valuemax="100">
+											<span id="progress-text">0/100</span>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 					<div class="col-sm-6">
+						<!-- <div class="card-body">
+								<h5 class="card-title">排名</h5>
+								<div id="rankingContainer"></div> -->
 						<div class="card">
 							<div class="card-body">
-								<h5 class="card-title">排名</h5>
-								<div id="rankingContainer"></div>
+								<h4 class="card-title">排名</h4>
+								<div class="ranking">
+									<span id="numerator" class="numerator">#</span> <span>/</span>
+									<span id="denominator" class="denominator">#</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-
 			</div>
 
 		</section>
@@ -424,6 +508,25 @@
 	<script src="assets/js/main.js"></script>
 	<script>
 
+	//update user name
+	document.addEventListener('DOMContentLoaded', function() {
+            const email = sessionStorage.getItem('userEmail');
+            if (email) {
+                fetch(`/api/user-name?email=${email}`)
+                    .then(response => response.text())
+                    .then(name => {
+                        if (name) {
+                            document.getElementById('user-name').innerText = `${name}您好`;
+                        } else {
+                            document.getElementById('user-name').innerText = '使用者您好';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching user name:', error));
+            } else {
+                console.error('No email found in sessionStorage.');
+            }
+        });
+	
 //date picker
 $(document).ready(function() {
 	// Get today's date
@@ -456,6 +559,47 @@ document.addEventListener("DOMContentLoaded", function() {
         var modal4Options = ['第一撞球桌', '第二撞球桌', '第三撞球桌'];
         generateModal('modalBillard', '撞球桌', modal4Options);
     });
+	
+
+    
+});
+//ranking
+document.addEventListener('DOMContentLoaded', function() {
+            const email = sessionStorage.getItem('userEmail');
+            if (email) {
+                fetch(`/api/reservations/user-ranking?email=${email}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        const [numerator, denominator] = data.split('/');
+                        document.getElementById('numerator').innerText = numerator;
+                        document.getElementById('denominator').innerText = denominator;
+                    })
+                    .catch(error => console.error('Error fetching ranking:', error));
+            } else {
+                console.error('No email found in sessionStorage.');
+            }
+        });
+
+//progress
+document.addEventListener('DOMContentLoaded', function() {
+    function updateProgressBar(current, max) {
+        var progressBar = document.getElementById('progress-bar');
+        var progressText = document.getElementById('progress-text');
+        if (progressBar && progressText) {
+            var percentage = (current / max) * 100;
+            progressBar.style.width = percentage + '%';
+            progressBar.setAttribute('aria-valuenow', current);
+            progressText.textContent = current + '/' + max;
+        } else {
+            console.error("Progress bar elements not found.");
+        }
+    }
+
+    // 假設你有一個API來獲取當前的預約次數和升級所需次數
+    var currentReservations = 50; // 獲取當前預約次數
+    var upgradeThreshold = 100;   // 獲取升級所需的次數
+
+    updateProgressBar(currentReservations, upgradeThreshold);
 });
 
 function checkAllReservationStatuses() {
@@ -482,6 +626,15 @@ function checkReservationStatus(field, element) {
 }
 
 
+
+async function fetchReservedTimeslots(date, field) {
+    const response = await fetch(`/api/reservations/timeslots?date=${date}&field=${field}`);
+    if (response.ok) {
+        return response.json();
+    } else {
+        throw new Error('Failed to fetch reserved timeslots');
+    }
+}
 
 function generateModal(modalId, modalTitle, options) {
     // Check if the modal already exists
@@ -530,91 +683,14 @@ function generateModal(modalId, modalTitle, options) {
                     </div>
                     <p>
                     <p>選擇時間：</p>
-                    <div class="col-auto">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="check1-${modalId}" name="time" value="08:00-09:00">
-                            <label class="form-check-label" for="check1-${modalId}">08:00-09:00 </label>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="check2-${modalId}" name="time" value="09:00-10:00">
-                            <label class="form-check-label" for="check2-${modalId}">09:00-10:00 </label>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="check3-${modalId}" name="time" value="10:00-11:00">
-                            <label class="form-check-label" for="check3-${modalId}">10:00-11:00</label>
-                        </div>
-                    </div>
-                    <!--second row-->
-                    <div class="row gx-3">
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check4-${modalId}" name="time" value="11:00-12:00">
-                                <label class="form-check-label" for="check4-${modalId}">11:00-12:00</label>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check5-${modalId}" name="time" value="12:00-13:00">
-                                <label class="form-check-label" for="check5-${modalId}">12:00-13:00</label>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check6-${modalId}" name="time" value="13:00-14:00">
-                                <label class="form-check-label" for="check6-${modalId}">13:00-14:00</label>
-                            </div>
-                        </div>
-                    </div>
-                    <!--third row-->
-                    <div class="row gx-3">
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check7-${modalId}" name="time" value="14:00-15:00">
-                                <label class="form-check-label" for="check7-${modalId}">14:00-15:00</label>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check8-${modalId}" name="time" value="15:00-16:00">
-                                <label class="form-check-label" for="check8-${modalId}">15:00-16:00</label>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check9-${modalId}" name="time" value="16:00-17:00">
-                                <label class="form-check-label" for="check9-${modalId}">16:00-17:00</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row gx-3">
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check10-${modalId}" name="time" value="17:00-18:00">
-                                <label class="form-check-label" for="check10-${modalId}">17:00-18:00</label>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check11-${modalId}" name="time" value="19:00-20:00">
-                                <label class="form-check-label" for="check11-${modalId}">19:00-20:00</label>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" id="check12-${modalId}" name="time" value="21:00-22:00">
-                                <label class="form-check-label" for="check12-${modalId}">21:00-22:00</label>
-                            </div>
-                        </div>
+                    <div id="${modalId}-time-options">
+                        <!-- Time options will be generated dynamically -->
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消預約</button>
-                                <button type="button" class="btn btn-primary" id="submitReservation-${modalId}" style="background-color:#149ddd;border:none">確認預約</button>
+                <button type="button" class="btn btn-primary" id="submitReservation-${modalId}" style="background-color:#149ddd;border:none">確認預約</button>
             </div>
         </div>
     </div>
@@ -626,6 +702,19 @@ function generateModal(modalId, modalTitle, options) {
 
     // Generate options dynamically
     generateModalOptions(`${modalId}-body-options`, options);
+    
+    // Set min and max date for datepicker
+    
+
+    const today = new Date();
+    const maxDate = new Date(today);
+    today.setDate(today.getDate() + 1); // Increment today by 1 day
+
+    maxDate.setDate(today.getDate() + 7); // Set maxDate 7 days after today
+
+    const datePicker = document.getElementById(`datepicker-${modalId}`);
+    datePicker.min = today.toISOString().split('T')[0];
+    datePicker.max = maxDate.toISOString().split('T')[0];
 
     // Bind the event listener to the dynamically created button
     document.getElementById(`submitReservation-${modalId}`).addEventListener("click", async function(event) {
@@ -640,9 +729,6 @@ function generateModal(modalId, modalTitle, options) {
             reservationData[key] = value;
         });
 
-        // Add user email to the reservation data
-        //reservationData.email = "user@example.com"; // user email
-        
         // Add user email to the reservation data
         const email = sessionStorage.getItem('userEmail'); // 獲取用戶 email
         if (!email) {
@@ -668,7 +754,8 @@ function generateModal(modalId, modalTitle, options) {
 
             if (response.ok) {
                 const data = await response.json();
-                alert('Reservation successful ' + data.message);
+                alert(data.message);
+                window.location.reload();
 
                 // Close the modal after successful reservation
                 const modalElement = document.getElementById(modalId);
@@ -678,90 +765,138 @@ function generateModal(modalId, modalTitle, options) {
                 }
             } else {
                 const errorData = await response.json();
-                alert('Reservation failed: ' + (errorData.message || 'Unknown error'));
+                alert((errorData.message || 'Unknown error'));
+                window.location.reload();
             }
         } catch (error) {
             console.error('Error:', error);
             alert('Reservation failed: ' + error.message);
+            window.location.reload();
         }
-        
+    });
+
+    // Bind date change event to dynamically update time options
+    document.getElementById(`datepicker-${modalId}`).addEventListener("change", async function() {
+        const selectedDate = this.value;
+        const selectedField = document.querySelector(`#${modalId}-body-options input[name='field']:checked`).value;
+
+        try {
+            const reservedTimeslots = await fetchReservedTimeslots(selectedDate, selectedField);
+            updateAvailableTimes(`${modalId}-time-options`, reservedTimeslots);
+        } catch (error) {
+            console.error('Error fetching reserved timeslots:', error);
+        }
+    });
+}
+
+function updateAvailableTimes(containerId, reservedTimeslots) {
+    const timeSlots = [
+        "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", 
+        "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00",
+        "16:00-17:00", "17:00-18:00", "19:00-20:00", "21:00-22:00"
+    ];
+    
+    const timeOptionsContainer = document.getElementById(containerId);
+    timeOptionsContainer.innerHTML = ''; // Clear previous options
+
+    timeSlots.forEach((timeSlot, index) => {
+        const isReserved = reservedTimeslots.includes(timeSlot);
+
+        const div = document.createElement('div');
+        div.classList.add('col-auto', 'form-check');
+
+        const input = document.createElement('input');
+        input.classList.add('form-check-input');
+        input.setAttribute('type', 'radio');
+        input.setAttribute('name', 'time');
+        input.setAttribute('id', `${containerId}-time${index}`);
+        input.setAttribute('value', timeSlot);
+        if (isReserved) {
+            input.setAttribute('disabled', 'true');
+        }
+
+        const label = document.createElement('label');
+        label.classList.add('form-check-label');
+        label.setAttribute('for', `${containerId}-time${index}`);
+        label.textContent = timeSlot;
+
+        div.appendChild(input);
+        div.appendChild(label);
+        timeOptionsContainer.appendChild(div);
     });
 }
 
 function generateModalOptions(containerId, options) {
-    var modalOptions = document.getElementById(containerId);
+    const modalOptions = document.getElementById(containerId);
     modalOptions.innerHTML = ''; // Clear previous content
 
     options.forEach(function(option, index) {
-        var div = document.createElement('div');
-        div.classList.add('col-auto');
-        div.classList.add("form-check");
+        const div = document.createElement('div');
+        div.classList.add('col-auto', 'form-check');
 
-        var input = document.createElement('input');
+        const input = document.createElement('input');
         input.classList.add('form-check-input');
         input.setAttribute('type', 'radio');
-        input.setAttribute('name', 'field'); // All options belong to 'field'
-        input.setAttribute('id', containerId + 'option' + (index + 1));
-        input.setAttribute('value', option); // Use the actual option value
+        input.setAttribute('name', 'field');
+        input.setAttribute('id', `${containerId}-option${index}`);
+        input.setAttribute('value', option);
 
-        var label = document.createElement('label');
+        const label = document.createElement('label');
         label.classList.add('form-check-label');
-        label.setAttribute('for', containerId + 'option' + (index + 1));
+        label.setAttribute('for', `${containerId}-option${index}`);
         label.textContent = option;
 
-        var formCheckDiv = document.createElement('div');
-        formCheckDiv.classList.add('form-check');
-
-        formCheckDiv.appendChild(input);
-        formCheckDiv.appendChild(label);
-        div.appendChild(formCheckDiv);
+        div.appendChild(input);
+        div.appendChild(label);
         modalOptions.appendChild(div);
     });
-    
-    
 }
 
-//ranking
+
+//old ranking
 
 
-$(document).ready(function() {
-    // 從 sessionStorage 中讀取電子郵件
-    const email = sessionStorage.getItem('userEmail');
+// $(document).ready(function() {
+//     // 從 sessionStorage 中讀取電子郵件
+//     const email = sessionStorage.getItem('userEmail');
 
-    if (email) {
-        $.ajax({
-            url: '/api/reservations/user-ranking',
-            method: 'GET',
-            data: { email: email },
-            success: function(data) {
-                displayRanking(data);
-            },
-            error: function(error) {
-                console.error('Error fetching ranking:', error);
-            }
-        });
-    } else {
-        console.error('No email found in sessionStorage');
-    }
+//     if (email) {
+//         $.ajax({
+//             url: '/api/reservations/user-ranking',
+//             method: 'GET',
+//             data: { email: email },
+//             success: function(data) {
+//                 displayRanking(data);
+//             },
+//             error: function(error) {
+//                 console.error('Error fetching ranking:', error);
+//             }
+//         });
+//     } else {
+//         console.error('No email found in sessionStorage');
+//     }
 
-    function displayRanking(ranking) {
-        const rankingContainer = $('#rankingContainer');
-        const userEmail = ranking.email;
-        const reservationCount = ranking.reservationCount;
+//     function displayRanking(ranking) {
+//         const rankingContainer = $('#rankingContainer');
+//         const userEmail = ranking.email;
+//         const reservationCount = ranking.reservationCount;
 
-        const cardHtml = `
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">排名</h5>
-                    <p class="card-text">使用者: ${userEmail}</p>
-                    <p class="card-text">預約次數: ${reservationCount}</p>
-                </div>
-            </div>
-        `;
+//         const cardHtml = `
+//             <div class="card">
+//                 <div class="card-body">
+//                 <!--　for old ranking function -->
+//                     <!--<h5 class="card-title">排名</h5>
+//                     <p class="card-text">使用者: ${userEmail}</p>
+//                     <p class="card-text">預約次數: ${reservationCount}</p>-->
+                    
+                    
+//                 </div>
+//             </div>
+//         `;
 
-        rankingContainer.append(cardHtml);
-    }
-});
+//         rankingContainer.append(cardHtml);
+//     }
+// });
 
   </script>
 

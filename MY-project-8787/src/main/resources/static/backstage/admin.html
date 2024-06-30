@@ -54,10 +54,29 @@
 			</div>
 
 			<nav id="navbar" class="nav-menu navbar">
-				<ul>
+				<!-- <ul>
 					<li><a href="/backstage/admin.html"
 						class="nav-link scrollto active"><i class="bx bx-server"></i>
 							<span>管理者後台</span></a></li>
+				</ul> -->
+				<ul>
+					<li><a href="#reservationPreview"
+						class="nav-link scrollto active"><i class="bx bx-server"></i>
+							<span>預約資料一覽</span></a></li>
+				</ul>
+				<ul>
+					<li><a href="#userPreview" class="nav-link scrollto active"><i
+							class="bx bx-server"></i> <span>使用者資料一覽</span></a></li>
+				</ul>
+				<ul>
+					<li><a href="#userAnalysis" class="nav-link scrollto active"><i
+							class="bx bx-server"></i> <span>使用者資料分析</span></a></li>
+				</ul>
+				<ul>
+					<li><a href="#reservationAnalysis"
+						class="nav-link scrollto active"><i class="bx bx-server"></i>
+							<span>預約資料分析</span></a></li>
+
 				</ul>
 			</nav>
 			<!-- .nav-menu -->
@@ -83,9 +102,9 @@
 		</section>
 		<!-- End Breadcrumbs -->
 
-		<section class="inner-page">
+		<section class="inner-page" id="reservationPreview">
 			<div class="container">
-				<h3>預約資料一覽</h3>
+				<h2>預約資料一覽</h2>
 				<table id="reservationTable" class="display">
 					<thead>
 						<tr>
@@ -185,6 +204,105 @@
 			</div>
 		</section>
 
+		<section class="inner-page" id="userPreview">
+			<div class="container">
+				<h2>使用者資料一覽</h2>
+				<table id="userTable" class="display">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>姓名</th>
+							<th>性別</th>
+							<th>生日</th>
+							<th>手機</th>
+							<th>email</th>
+							<th>修改</th>
+							<th>刪除</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Data will be populated here -->
+					</tbody>
+				</table>
+
+				<!-- Modal for adding/updating user -->
+				<div class="modal fade" id="userModal" tabindex="-1"
+					aria-labelledby="modalTitle" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="modalTitle">修改使用者資訊</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"
+									aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								<form id="userForm">
+									<input type="hidden" id="userId">
+									<div class="mb-3">
+										<label for="user-name" class="form-label">姓名:</label> <input
+											type="text" class="form-control" id="user-name"
+											name="user-name" required>
+									</div>
+									<div class="mb-3">
+										<label for="user-gender" class="form-label">性別:</label> <select
+											class="form-control" id="user-gender" name="user-gender"
+											required>
+											<option value="male">男性</option>
+											<option value="female">女性</option>
+											<option value="others">其他</option>
+										</select>
+									</div>
+									<div class="mb-3">
+										<label for="birthday" class="form-label">生日:</label> <input
+											type="date" class="form-control" id="birthday"
+											name="birthday" required>
+									</div>
+									<div class="mb-3">
+										<label for="phone" class="form-label">手機:</label> <input
+											type="text" class="form-control" id="phone" name="phone"
+											required>
+									</div>
+									<div class="mb-3">
+										<label for="email" class="form-label">電子郵件:</label> <input
+											type="email" class="form-control" id="email" name="email"
+											required>
+									</div>
+									<button type="submit" class="btn btn-primary">提交</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="inner-page" id="userAnalysis">
+			<div class="container">
+				<h2>使用者資料分析</h2>
+				<div class="mb-3">
+					<div id="gender_chart" style="width: 900px; height: 500px;"></div>
+				</div>
+			</div>
+		</section>
+
+		<section class="inner-page" id="reservationAnalysis">
+			<div class="container">
+				<h2>預約資料分析</h2>
+				<div class="mb-3">
+					<h4>場地借用次數分析</h4>
+					<div id="columnchart_material" style="width: 800px; height: 500px;"></div>
+				</div>
+				<div class="mb-3">
+					<h4>借用時間頻率分析</h4>
+					<div id="barchart_material" style="width: 800px; height: 500px;"></div>
+				</div>
+				<div class="mb-3">
+					<h4>借用器具分析</h4>
+					<div id="piechart_material" style="width: 800px; height: 500px;"></div>
+				</div>
+		</section>
+
+
 	</main>
 	<!-- End #main -->
 
@@ -209,6 +327,7 @@
 	<script src="assets/js/main.js"></script>
 
 	<script>
+		//for reservation preview
 		$(document)
 				.ready(
 						function() {
@@ -353,7 +472,348 @@
 								$('#reservationModal').modal('show');
 							});
 						});
+
+		//for user preview
+
+		$(document)
+				.ready(
+						function() {
+							const table = $('#userTable')
+									.DataTable(
+											{
+												"ajax" : {
+													"url" : "/api/users/all",
+													"dataSrc" : ""
+												},
+												"columns" : [
+														{
+															"data" : "id"
+														},
+														{
+															"data" : "name"
+														},
+														{
+															"data" : "gender"
+														},
+														{
+															"data" : "birthday"
+														},
+														{
+															"data" : "phone"
+														},
+														{
+															"data" : "email"
+														},
+														{
+															"data" : null,
+															"defaultContent" : '<button class="editButton btn btn-warning">修改</button>'
+														},
+														{
+															"data" : null,
+															"defaultContent" : '<button class="deleteButton btn btn-danger">刪除</button>'
+														} ]
+											});
+
+							// 新增或修改使用者表單提交事件
+							$('#userForm')
+									.on(
+											'submit',
+											function(event) {
+												event.preventDefault();
+
+												const userId = $('#userId')
+														.val();
+												const userData = {
+													name : $('#user-name')
+															.val(),
+													gender : $('#user-gender')
+															.val(),
+													birthday : $('#birthday')
+															.val(),
+													phone : $('#phone').val(),
+													email : $('#email').val()
+												};
+
+												const url = userId ? `/api/users/${userId}`
+														: '/api/users';
+												const method = userId ? 'PUT'
+														: 'POST';
+
+												$
+														.ajax({
+															url : url,
+															method : method,
+															contentType : 'application/json',
+															data : JSON
+																	.stringify(userData),
+															success : function(
+																	response) {
+																$('#userModal')
+																		.modal(
+																				'hide');
+																table.ajax
+																		.reload();
+															},
+															error : function(
+																	error) {
+																alert('操作失敗，請重試');
+															}
+														});
+											});
+
+							// 點擊修改按鈕事件
+							$('#userTable tbody').on(
+									'click',
+									'.editButton',
+									function() {
+										const data = table.row(
+												$(this).parents('tr')).data();
+										$('#userId').val(data.id);
+										$('#user-name').val(data.name);
+										$('#user-gender').val(data.gender);
+										$('#birthday').val(data.birthday);
+										$('#phone').val(data.phone);
+										$('#email').val(data.email);
+										$('#modalTitle').text('修改使用者資訊');
+										$('#userModal').modal('show');
+									});
+
+							// 點擊刪除按鈕事件
+							$('#userTable tbody').on(
+									'click',
+									'.deleteButton',
+									function() {
+										const data = table.row(
+												$(this).parents('tr')).data();
+										if (confirm('確定要刪除這個使用者嗎？')) {
+											$.ajax({
+												url : `/api/users/${data.id}`,
+												method : 'DELETE',
+												success : function(response) {
+													table.ajax.reload();
+												},
+												error : function(error) {
+													alert('刪除失敗，請重試');
+												}
+											});
+										}
+									});
+						});
 	</script>
+
+	<script type="text/javascript"
+		src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript">
+  //加載 Google Charts 庫並設置所需的圖表包
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawGenderChart);
+
+    function drawGenderChart() {
+        fetch('/api/gender-data')
+            .then(response => response.json())
+            .then(data => {
+                var genderData = Object.entries(data);
+                var chartData = [['Gender', 'Percentage']].concat(genderData);
+
+                var data = google.visualization.arrayToDataTable(chartData);
+
+                var options = {
+                    title: '使用者性別分析'
+                };
+
+                var chart = new google.visualization.PieChart(document.getElementById('gender_chart'));
+                chart.draw(data, options);
+            })
+            .catch(error => console.error('Error fetching gender data:', error));
+    }
+</script>
+
+	<script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        // 從後端獲取數據
+        fetch('/api/reservations/field-usage-frequency')
+          .then(response => response.json())
+          .then(data => {
+            // 準備數據
+            var chartData = [
+              ['場地', '第一', '第二', '第三']
+            ];
+
+            var fieldMapping = {
+              '羽毛球場': ['羽毛球場', 0, 0, 0],
+              '壁球球場': ['壁球球場', 0, 0, 0],
+              '桌球桌': ['桌球桌', 0, 0, 0],
+              '撞球桌': ['撞球桌', 0, 0, 0]
+            };
+
+            data.forEach(item => {
+              console.log('Processing item:', item);  // 日誌記錄
+              let match = item.field.match(/^(第一|第二|第三)(.*)$/);
+              if (match) {
+                let index;
+                switch (match[1]) {
+                  case '第一':
+                    index = 1;
+                    break;
+                  case '第二':
+                    index = 2;
+                    break;
+                  case '第三':
+                    index = 3;
+                    break;
+                  default:
+                    index = 0;
+                }
+                let field = match[2];
+                if (fieldMapping[field]) {
+                  fieldMapping[field][index] = item.usage_count;
+                } else {
+                  console.error(`Unexpected field type: ${field}`);
+                }
+              } else {
+                console.error(`Unexpected field format: ${item.field}`);
+              }
+            });
+
+            for (let key in fieldMapping) {
+              chartData.push(fieldMapping[key]);
+            }
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            // 設置圖表選項
+            var options = {
+              chart: {
+                title: '場地借用次數分析',
+                subtitle: '',
+              }
+            };
+
+            // 創建圖表並繪製
+            var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+            chart.draw(googleData, google.charts.Bar.convertOptions(options));
+          })
+          .catch(error => {
+            console.error('Error fetching field usage frequency data:', error);
+          });
+      }
+    </script>
+ <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart', 'bar']});
+
+      // 當Google圖表加載完成時，調用所有的繪製函數
+      google.charts.setOnLoadCallback(drawAllCharts);
+
+      function drawAllCharts() {
+        drawTimeSlotChart();
+        drawEquipmentChart();
+      }
+
+      // 繪製借用時段頻率分析的橫條圖
+      function drawTimeSlotChart() {
+        fetch('/api/reservations/time-slot-usage-frequency')
+          .then(response => response.json())
+          .then(data => {
+            var chartData = [['Time Slot', 'Usage Count']];
+            const timeSlots = [
+              "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", 
+              "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00",
+              "16:00-17:00", "17:00-18:00", "19:00-20:00", "21:00-22:00"
+            ];
+
+            const usageCountMap = {};
+            data.forEach(item => {
+              usageCountMap[item.time] = item.usage_count;
+            });
+
+            timeSlots.forEach(slot => {
+              chartData.push([slot, usageCountMap[slot] || 0]);
+            });
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            var options = {
+              title: 'Time Slot Usage Frequency',
+              subtitle: 'Usage count by time slot',
+              hAxis: {title: 'Usage Count', minValue: 0},
+              vAxis: {title: 'Time Slot'}
+            };
+
+            var chart = new google.visualization.BarChart(document.getElementById('barchart_material'));
+            chart.draw(googleData, options);
+          })
+          .catch(error => {
+            console.error('Error fetching time slot usage frequency data:', error);
+          });
+      }
+
+      // 繪製是否借用球具的圓餅圖
+      function drawEquipmentChart() {
+        fetch('/api/reservations/equipment-usage-statistics')
+          .then(response => response.json())
+          .then(data => {
+            var chartData = [['Equipment Usage', 'Count']];
+            Object.keys(data).forEach(key => {
+              chartData.push([key, data[key]]);
+            });
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            var options = {
+              title: 'Equipment Usage Statistics',
+              pieHole: 0.4,
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('piechart_material'));
+            chart.draw(googleData, options);
+          })
+          .catch(error => {
+            console.error('Error fetching equipment usage statistics:', error);
+          });
+      }
+    </script>
+    
+    
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawEquipChart);
+
+      function drawEquipChart() {
+        // 從後端獲取數據
+        fetch('/api/reservations/equipment-usage-statistics')
+          .then(response => response.json())
+          .then(data => {
+            // 準備數據
+            var chartData = [
+              ['Equipment Usage', 'Count']
+            ];
+
+            Object.keys(data).forEach(key => {
+              chartData.push([key, data[key]]);
+            });
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            // 設置圖表選項
+            var options = {
+              title: 'Equipment Usage Statistics',
+              pieHole: 0.4,
+            };
+
+            // 創建圖表並繪製
+            var chart = new google.visualization.PieChart(document.getElementById('piechart_material'));
+
+            chart.draw(googleData, options);
+          })
+          .catch(error => {
+            console.error('Error fetching equipment usage statistics:', error);
+          });
+      }
+
 
 </body>
 

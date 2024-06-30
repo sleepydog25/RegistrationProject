@@ -58,7 +58,7 @@
                 <img src="assets/img/profile-img.jpg" alt=""
                     class="img-fluid rounded-circle">
                 <h1 class="text-light">
-                    <a href="./personal-page.html">使用者您好</a>
+                     <a href="./personal-page.html" id="user-name">      </a>
                 </h1>
             </div>
 
@@ -157,6 +157,26 @@
     <script src="assets/js/main.js"></script>
 
     <script>
+    
+  //update user name
+	document.addEventListener('DOMContentLoaded', function() {
+            const email = sessionStorage.getItem('userEmail');
+            if (email) {
+                fetch(`/api/user-name?email=${email}`)
+                    .then(response => response.text())
+                    .then(name => {
+                        if (name) {
+                            document.getElementById('user-name').innerText = `${name}您好`;
+                        } else {
+                            document.getElementById('user-name').innerText = '使用者您好';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching user name:', error));
+            } else {
+                console.error('No email found in sessionStorage.');
+            }
+        });
+  
     document.addEventListener("DOMContentLoaded", function() {
         let email = sessionStorage.getItem('userEmail');
         if (!email) {

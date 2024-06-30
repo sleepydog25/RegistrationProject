@@ -11,6 +11,7 @@ public class User {
     private String phone;
     private String email;
     private String password;
+    private boolean admin;
 
     public User() {
         // 註冊時自動生成UUID
@@ -81,5 +82,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }
