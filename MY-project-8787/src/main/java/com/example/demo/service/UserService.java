@@ -52,7 +52,6 @@ public class UserService {
 					user.setPhone(rs.getString("phone"));
 					user.setEmail(rs.getString("email"));
 					user.setPassword(rs.getString("password"));
-					user.setAdmin(rs.getBoolean("admin")); 
 					return user;
 				}
 			});

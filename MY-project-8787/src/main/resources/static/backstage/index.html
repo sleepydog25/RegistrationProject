@@ -106,6 +106,22 @@ ranking-->.ranking {
 	font-size: 1rem; /* 分母字體較小 */
 	margin-left: 0.5rem;
 }
+
+.loader {
+  width: 100%;
+  height: 30px;
+  border-radius: 20px;
+  background: 
+    repeating-linear-gradient(135deg, #149ddd 0 10px, #040b14 0 20px) 0/0% no-repeat,
+    repeating-linear-gradient(135deg, #ddd 0 10px, #eee 0 20px) 0/100%;
+  animation: l3 2s forwards;
+}
+
+
+@keyframes l3 {
+  100% { background-size: 100%; }
+}
+
 </style>
 
 <script>
@@ -124,7 +140,7 @@ ranking-->.ranking {
 				<img src="assets/img/profile-img.jpg" alt=""
 					class="img-fluid rounded-circle">
 				<h1 class="text-light">
-					 <a href="./personal-page.html" id="user-name">     </a>
+					<a href="./personal-page.html" id="user-name"> </a>
 				</h1>
 			</div>
 
@@ -150,7 +166,8 @@ ranking-->.ranking {
 			<div class="container">
 				<div class="section-title">
 					<h2>積分專區</h2>
-					<p>嘿~你的運動成果都會在這裡</p>
+					<p>嘿~你的運動成果都會在這裡<br>排名顯示了你在我們所有使用者中借閱次數，積分顯示你和下一個段位的距離<br>多運動一下，你的小獎盃會變色喔!加油 ~ </p>
+					
 				</div>
 				<!-- cards -->
 				<div class="row">
@@ -162,10 +179,10 @@ ranking-->.ranking {
 								</h5>
 								<div id="progress-container">
 									<div class="progress">
-										<div id="progress-bar" class="progress-bar bg-primary"
+										<div id="progress-bar" class="progress-bar loader"
 											role="progressbar" style="width: 0%;" aria-valuenow="0"
 											aria-valuemin="0" aria-valuemax="100">
-											<span id="progress-text">0/100</span>
+											<span id="progress-text">50/100</span>
 										</div>
 									</div>
 								</div>
@@ -503,146 +520,142 @@ ranking-->.ranking {
 	<!-- Bootstrap Datepicker JavaScript -->
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<!-- Template Main JS File -->
 	<script src="assets/js/main.js"></script>
-	<script>
 
-	//update user name
-	document.addEventListener('DOMContentLoaded', function() {
-            const email = sessionStorage.getItem('userEmail');
-            if (email) {
-                fetch(`/api/user-name?email=${email}`)
-                    .then(response => response.text())
-                    .then(name => {
-                        if (name) {
-                            document.getElementById('user-name').innerText = `${name}您好`;
-                        } else {
-                            document.getElementById('user-name').innerText = '使用者您好';
-                        }
-                    })
-                    .catch(error => console.error('Error fetching user name:', error));
-            } else {
-                console.error('No email found in sessionStorage.');
-            }
-        });
-	
-//date picker
-$(document).ready(function() {
-	// Get today's date
-	var today = new Date();
-
-	// Calculate the date one week from today
-	var oneWeekLater = new Date();
-	oneWeekLater.setDate(today.getDate() + 7);
-
-	// Initialize datepicker
-	$('#datepicker').datepicker({
-		format: 'yyyy-mm-dd', // Date format
-		autoclose: true, // Close the datepicker when a date is selected
-		todayHighlight: true, // Highlight today's date
-		startDate: today, // Restrict date selection to dates starting from today
-		endDate: oneWeekLater // Restrict date selection to dates up to one week later
-	});
-});
-
-//-----------------------------------------------------
-document.addEventListener("DOMContentLoaded", function() {
-	checkAllReservationStatuses();
-	document.getElementById('modal-trigger').addEventListener('click', function() {
-        var modal1Options = ['第一羽毛球場', '第二羽毛球場', '第三羽毛球場'];
-        generateModal('modalBadminton', '羽毛球場', modal1Options);
-        var modal2Options = ['第一壁球球場', '第二壁球球場', '第三壁球球場'];
-        generateModal('modalSquash', '壁球球場', modal2Options);
-        var modal3Options = ['第一桌球桌', '第二桌球桌', '第三桌球桌'];
-        generateModal('modalTabletennis', '桌球桌', modal3Options);
-        var modal4Options = ['第一撞球桌', '第二撞球桌', '第三撞球桌'];
-        generateModal('modalBillard', '撞球桌', modal4Options);
-    });
-	
-
-    
-});
-//ranking
-document.addEventListener('DOMContentLoaded', function() {
-            const email = sessionStorage.getItem('userEmail');
-            if (email) {
-                fetch(`/api/reservations/user-ranking?email=${email}`)
-                    .then(response => response.text())
-                    .then(data => {
-                        const [numerator, denominator] = data.split('/');
-                        document.getElementById('numerator').innerText = numerator;
-                        document.getElementById('denominator').innerText = denominator;
-                    })
-                    .catch(error => console.error('Error fetching ranking:', error));
-            } else {
-                console.error('No email found in sessionStorage.');
-            }
-        });
-
-//progress
-document.addEventListener('DOMContentLoaded', function() {
-    function updateProgressBar(current, max) {
-        var progressBar = document.getElementById('progress-bar');
-        var progressText = document.getElementById('progress-text');
-        if (progressBar && progressText) {
-            var percentage = (current / max) * 100;
-            progressBar.style.width = percentage + '%';
-            progressBar.setAttribute('aria-valuenow', current);
-            progressText.textContent = current + '/' + max;
+<script>
+    // update user name
+    document.addEventListener('DOMContentLoaded', function () {
+        const email = sessionStorage.getItem('userEmail');
+        if (email) {
+            fetch(`/api/user-name?email=${email}`)
+                .then(response => response.text())
+                .then(name => {
+                    if (name) {
+                        document.getElementById('user-name').innerText = `${name}您好`;
+                    } else {
+                        document.getElementById('user-name').innerText = '使用者您好';
+                    }
+                })
+                .catch(error => console.error('Error fetching user name:', error));
         } else {
-            console.error("Progress bar elements not found.");
+            console.error('No email found in sessionStorage.');
+        }
+    });
+
+    // date picker
+    $(document).ready(function () {
+        // Get today's date
+        var today = new Date();
+
+        // Calculate the date one week from today
+        var oneWeekLater = new Date();
+        oneWeekLater.setDate(today.getDate() + 7);
+
+        // Initialize datepicker
+        $('#datepicker').datepicker({
+            format: 'yyyy-mm-dd', // Date format
+            autolose: true, // Close the datepicker when a date is selected
+            todayHighlight: true, // Highlight today's date
+            startDate: today, // Restrict date selection to dates starting from today
+            endDate: oneWeekLater // Restrict date selection to dates up to one week later
+        });
+    });
+
+    //-----------------------------------------------------
+    document.addEventListener("DOMContentLoaded", function () {
+        checkAllReservationStatuses();
+        document.getElementById('modal-trigger').addEventListener('click', function () {
+            var modal1Options = ['第一羽毛球場', '第二羽毛球場', '第三羽毛球場'];
+            generateModal('modalBadminton', '羽毛球場', modal1Options);
+            var modal2Options = ['第一壁球球場', '第二壁球球場', '第三壁球球場'];
+            generateModal('modalSquash', '壁球球場', modal2Options);
+            var modal3Options = ['第一桌球桌', '第二桌球桌', '第三桌球桌'];
+            generateModal('modalTabletennis', '桌球桌', modal3Options);
+            var modal4Options = ['第一撞球桌', '第二撞球桌', '第三撞球桌'];
+            generateModal('modalBillard', '撞球桌', modal4Options);
+        });
+    });
+
+    // ranking
+    document.addEventListener('DOMContentLoaded', function () {
+        const email = sessionStorage.getItem('userEmail');
+        if (email) {
+            fetch(`/api/reservations/user-ranking?email=${email}`)
+                .then(response => response.text())
+                .then(data => {
+                    const [numerator, denominator] = data.split('/');
+                    document.getElementById('numerator').innerText = numerator;
+                    document.getElementById('denominator').innerText = denominator;
+                })
+                .catch(error => console.error('Error fetching ranking:', error));
+        } else {
+            console.error('No email found in sessionStorage.');
+        }
+    });
+
+    // progress
+    document.addEventListener('DOMContentLoaded', function () {
+        function updateProgressBar(current, max) {
+            var progressBar = document.getElementById('progress-bar');
+            var progressText = document.getElementById('progress-text');
+            if (progressBar && progressText) {
+                var percentage = (current / max) * 100;
+                progressBar.style.width = percentage + '%';
+                progressBar.setAttribute('aria-valuenow', current);
+                progressText.textContent = current + '/' + max;
+            } else {
+                console.error("Progress bar elements not found.");
+            }
+        }
+
+        // 假設你有一個API來獲取當前的預約次數和升級所需次數
+        var currentReservations = 50; // 獲取當前預約次數
+        var upgradeThreshold = 100;   // 獲取升級所需的次數
+
+        updateProgressBar(currentReservations, upgradeThreshold);
+    });
+
+    function checkAllReservationStatuses() {
+        const statusElements = document.querySelectorAll('.reservation-status');
+        statusElements.forEach(element => {
+            const field = element.getAttribute('data-field');
+            checkReservationStatus(field, element);
+        });
+    }
+
+    function checkReservationStatus(field, element) {
+        fetch(`/api/reservations/check-status?field=${field}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === '不開放') {
+                    element.textContent = '不開放';
+                    element.style.color = 'white';
+                } else {
+                    element.textContent = '開放中';
+                    element.style.color = 'white';
+                }
+            })
+            .catch(error => console.error('Error fetching reservation status:', error));
+    }
+
+    async function fetchReservedTimeslots(date, field) {
+        const response = await fetch(`/api/reservations/timeslots?date=${date}&field=${field}`);
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Failed to fetch reserved timeslots');
         }
     }
 
-    // 假設你有一個API來獲取當前的預約次數和升級所需次數
-    var currentReservations = 50; // 獲取當前預約次數
-    var upgradeThreshold = 100;   // 獲取升級所需的次數
+    function generateModal(modalId, modalTitle, options) {
+        // Check if the modal already exists
+        if (document.getElementById(modalId)) {
+            return;
+        }
 
-    updateProgressBar(currentReservations, upgradeThreshold);
-});
-
-function checkAllReservationStatuses() {
-    const statusElements = document.querySelectorAll('.reservation-status');
-    statusElements.forEach(element => {
-        const field = element.getAttribute('data-field');
-        checkReservationStatus(field, element);
-    });
-}
-
-function checkReservationStatus(field, element) {
-    fetch(`/api/reservations/check-status?field=${field}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === '不開放') {
-                element.textContent = '不開放';
-                element.style.color = 'white';
-            } else {
-                element.textContent = '開放中';
-                element.style.color = 'white';
-            }
-        })
-        .catch(error => console.error('Error fetching reservation status:', error));
-}
-
-
-
-async function fetchReservedTimeslots(date, field) {
-    const response = await fetch(`/api/reservations/timeslots?date=${date}&field=${field}`);
-    if (response.ok) {
-        return response.json();
-    } else {
-        throw new Error('Failed to fetch reserved timeslots');
-    }
-}
-
-function generateModal(modalId, modalTitle, options) {
-    // Check if the modal already exists
-    if (document.getElementById(modalId)) {
-        return;
-    }
-
-    let modalContent = `
+        let modalContent = `
 <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content" style="background-color:rgba(39, 40, 41, 0.8); color:#fff;">
@@ -697,208 +710,225 @@ function generateModal(modalId, modalTitle, options) {
 </div>
 `;
 
-    // Add the modal content to the document body
-    document.body.insertAdjacentHTML('beforeend', modalContent);
+        // Add the modal content to the document body
+        document.body.insertAdjacentHTML('beforeend', modalContent);
 
-    // Generate options dynamically
-    generateModalOptions(`${modalId}-body-options`, options);
-    
-    // Set min and max date for datepicker
-    
+        // Generate options dynamically
+        generateModalOptions(`${modalId}-body-options`, options);
 
-    const today = new Date();
-    const maxDate = new Date(today);
-    today.setDate(today.getDate() + 1); // Increment today by 1 day
+        // Set min and max date for datepicker
+        const today = new Date();
+        const maxDate = new Date(today);
+        today.setDate(today.getDate() + 1); // Increment today by 1 day
+        maxDate.setDate(today.getDate() + 7); // Set maxDate 7 days after today
+        const datePicker = document.getElementById(`datepicker-${modalId}`);
+        datePicker.min = today.toISOString().split('T')[0];
+        datePicker.max = maxDate.toISOString().split('T')[0];
 
-    maxDate.setDate(today.getDate() + 7); // Set maxDate 7 days after today
+        // Bind the event listener to the dynamically created button
+        document.getElementById(`submitReservation-${modalId}`).addEventListener("click", async function (event) {
+            event.preventDefault(); // Prevent the form from submitting normally
 
-    const datePicker = document.getElementById(`datepicker-${modalId}`);
-    datePicker.min = today.toISOString().split('T')[0];
-    datePicker.max = maxDate.toISOString().split('T')[0];
+            const form = document.getElementById(`reservationForm-${modalId}`);
+            const formData = new FormData(form);
 
-    // Bind the event listener to the dynamically created button
-    document.getElementById(`submitReservation-${modalId}`).addEventListener("click", async function(event) {
-        event.preventDefault(); // Prevent the form from submitting normally
-
-        const form = document.getElementById(`reservationForm-${modalId}`);
-        const formData = new FormData(form);
-
-        // Convert FormData to JSON object
-        const reservationData = {};
-        formData.forEach((value, key) => {
-            reservationData[key] = value;
-        });
-
-        // Add user email to the reservation data
-        const email = sessionStorage.getItem('userEmail'); // 獲取用戶 email
-        if (!email) {
-            alert('User email not found in sessionStorage');
-            return;
-        }
-        reservationData.email = email; // 將 email 添加到預約數據中
-
-        // Add modal options to the reservation data
-        reservationData.options = options;
-
-        // Log the reservation data to check the format
-        console.log("Reservation Data:", reservationData);
-        
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reservationData)
+            // Convert FormData to JSON object
+            const reservationData = {};
+            formData.forEach((value, key) => {
+                reservationData[key] = value;
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                alert(data.message);
-                window.location.reload();
-
-                // Close the modal after successful reservation
-                const modalElement = document.getElementById(modalId);
-                const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
-            } else {
-                const errorData = await response.json();
-                alert((errorData.message || 'Unknown error'));
-                window.location.reload();
+            // Add user email to the reservation data
+            const email = sessionStorage.getItem('userEmail'); // 獲取用戶 email
+            if (!email) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '錯誤',
+                    text: 'User email not found in sessionStorage'
+                });
+                return;
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Reservation failed: ' + error.message);
-            window.location.reload();
-        }
-    });
+            reservationData.email = email; // 將 email 添加到預約數據中
 
-    // Bind date change event to dynamically update time options
-    document.getElementById(`datepicker-${modalId}`).addEventListener("change", async function() {
-        const selectedDate = this.value;
-        const selectedField = document.querySelector(`#${modalId}-body-options input[name='field']:checked`).value;
+            // Add modal options to the reservation data
+            reservationData.options = options;
 
-        try {
-            const reservedTimeslots = await fetchReservedTimeslots(selectedDate, selectedField);
-            updateAvailableTimes(`${modalId}-time-options`, reservedTimeslots);
-        } catch (error) {
-            console.error('Error fetching reserved timeslots:', error);
-        }
-    });
-}
+            // Log the reservation data to check the format
+            console.log("Reservation Data:", reservationData);
 
-function updateAvailableTimes(containerId, reservedTimeslots) {
-    const timeSlots = [
-        "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", 
-        "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00",
-        "16:00-17:00", "17:00-18:00", "19:00-20:00", "21:00-22:00"
-    ];
-    
-    const timeOptionsContainer = document.getElementById(containerId);
-    timeOptionsContainer.innerHTML = ''; // Clear previous options
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(reservationData)
+                });
 
-    timeSlots.forEach((timeSlot, index) => {
-        const isReserved = reservedTimeslots.includes(timeSlot);
+                if (response.ok) {
+                    const data = await response.json();
+                    Swal.fire({
+                        icon: 'success',
+                        title: '成功',
+                        text: data.message
+                    }).then(() => {
+                        window.location.reload();
+                    });
 
-        const div = document.createElement('div');
-        div.classList.add('col-auto', 'form-check');
+                    // Close the modal after successful reservation
+                    const modalElement = document.getElementById(modalId);
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                } else {
+                    const errorData = await response.json();
+                    Swal.fire({
+                        icon: 'error',
+                        title: '錯誤',
+                        text: errorData.message || 'Unknown error'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '錯誤',
+                    text: 'Reservation failed: ' + error.message
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        });
 
-        const input = document.createElement('input');
-        input.classList.add('form-check-input');
-        input.setAttribute('type', 'radio');
-        input.setAttribute('name', 'time');
-        input.setAttribute('id', `${containerId}-time${index}`);
-        input.setAttribute('value', timeSlot);
-        if (isReserved) {
-            input.setAttribute('disabled', 'true');
-        }
+        // Bind date change event to dynamically update time options
+        document.getElementById(`datepicker-${modalId}`).addEventListener("change", async function () {
+            const selectedDate = this.value;
+            const selectedField = document.querySelector(`#${modalId}-body-options input[name='field']:checked`).value;
 
-        const label = document.createElement('label');
-        label.classList.add('form-check-label');
-        label.setAttribute('for', `${containerId}-time${index}`);
-        label.textContent = timeSlot;
+            try {
+                const reservedTimeslots = await fetchReservedTimeslots(selectedDate, selectedField);
+                updateAvailableTimes(`${modalId}-time-options`, reservedTimeslots);
+            } catch (error) {
+                console.error('Error fetching reserved timeslots:', error);
+            }
+        });
+    }
 
-        div.appendChild(input);
-        div.appendChild(label);
-        timeOptionsContainer.appendChild(div);
-    });
-}
+    function updateAvailableTimes(containerId, reservedTimeslots) {
+        const timeSlots = [
+            "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00",
+            "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00",
+            "16:00-17:00", "17:00-18:00", "19:00-20:00", "21:00-22:00"
+        ];
 
-function generateModalOptions(containerId, options) {
-    const modalOptions = document.getElementById(containerId);
-    modalOptions.innerHTML = ''; // Clear previous content
+        const timeOptionsContainer = document.getElementById(containerId);
+        timeOptionsContainer.innerHTML = ''; // Clear previous options
 
-    options.forEach(function(option, index) {
-        const div = document.createElement('div');
-        div.classList.add('col-auto', 'form-check');
+        timeSlots.forEach((timeSlot, index) => {
+            const isReserved = reservedTimeslots.includes(timeSlot);
 
-        const input = document.createElement('input');
-        input.classList.add('form-check-input');
-        input.setAttribute('type', 'radio');
-        input.setAttribute('name', 'field');
-        input.setAttribute('id', `${containerId}-option${index}`);
-        input.setAttribute('value', option);
+            const div = document.createElement('div');
+            div.classList.add('col-auto', 'form-check');
 
-        const label = document.createElement('label');
-        label.classList.add('form-check-label');
-        label.setAttribute('for', `${containerId}-option${index}`);
-        label.textContent = option;
+            const input = document.createElement('input');
+            input.classList.add('form-check-input');
+            input.setAttribute('type', 'radio');
+            input.setAttribute('name', 'time');
+            input.setAttribute('id', `${containerId}-time${index}`);
+            input.setAttribute('value', timeSlot);
+            if (isReserved) {
+                input.setAttribute('disabled', 'true');
+            }
 
-        div.appendChild(input);
-        div.appendChild(label);
-        modalOptions.appendChild(div);
-    });
-}
+            const label = document.createElement('label');
+            label.classList.add('form-check-label');
+            label.setAttribute('for', `${containerId}-time${index}`);
+            label.textContent = timeSlot;
+
+            div.appendChild(input);
+            div.appendChild(label);
+            timeOptionsContainer.appendChild(div);
+        });
+    }
+
+    function generateModalOptions(containerId, options) {
+        const modalOptions = document.getElementById(containerId);
+        modalOptions.innerHTML = ''; // Clear previous content
+
+        options.forEach(function (option, index) {
+            const div = document.createElement('div');
+            div.classList.add('col-auto', 'form-check');
+
+            const input = document.createElement('input');
+            input.classList.add('form-check-input');
+            input.setAttribute('type', 'radio');
+            input.setAttribute('name', 'field');
+            input.setAttribute('id', `${containerId}-option${index}`);
+            input.setAttribute('value', option);
+
+            const label = document.createElement('label');
+            label.classList.add('form-check-label');
+            label.setAttribute('for', `${containerId}-option${index}`);
+            label.textContent = option;
+
+            div.appendChild(input);
+            div.appendChild(label);
+            modalOptions.appendChild(div);
+        });
+    }
+  //old ranking
 
 
-//old ranking
+ // $(document).ready(function() {
+//      // 從 sessionStorage 中讀取電子郵件
+//      const email = sessionStorage.getItem('userEmail');
+
+//      if (email) {
+//          $.ajax({
+//              url: '/api/reservations/user-ranking',
+//              method: 'GET',
+//              data: { email: email },
+//              success: function(data) {
+//                  displayRanking(data);
+//              },
+//              error: function(error) {
+//                  console.error('Error fetching ranking:', error);
+//              }
+//          });
+//      } else {
+//          console.error('No email found in sessionStorage');
+//      }
+
+//      function displayRanking(ranking) {
+//          const rankingContainer = $('#rankingContainer');
+//          const userEmail = ranking.email;
+//          const reservationCount = ranking.reservationCount;
+
+//          const cardHtml = `
+//              <div class="card">
+//                  <div class="card-body">
+//                  <!--　for old ranking function -->
+//                      <!--<h5 class="card-title">排名</h5>
+//                      <p class="card-text">使用者: ${userEmail}</p>
+//                      <p class="card-text">預約次數: ${reservationCount}</p>-->
+                     
+                     
+//                  </div>
+//              </div>
+//          `;
+
+//          rankingContainer.append(cardHtml);
+//      }
+ // });
+</script>
 
 
-// $(document).ready(function() {
-//     // 從 sessionStorage 中讀取電子郵件
-//     const email = sessionStorage.getItem('userEmail');
 
-//     if (email) {
-//         $.ajax({
-//             url: '/api/reservations/user-ranking',
-//             method: 'GET',
-//             data: { email: email },
-//             success: function(data) {
-//                 displayRanking(data);
-//             },
-//             error: function(error) {
-//                 console.error('Error fetching ranking:', error);
-//             }
-//         });
-//     } else {
-//         console.error('No email found in sessionStorage');
-//     }
 
-//     function displayRanking(ranking) {
-//         const rankingContainer = $('#rankingContainer');
-//         const userEmail = ranking.email;
-//         const reservationCount = ranking.reservationCount;
 
-//         const cardHtml = `
-//             <div class="card">
-//                 <div class="card-body">
-//                 <!--　for old ranking function -->
-//                     <!--<h5 class="card-title">排名</h5>
-//                     <p class="card-text">使用者: ${userEmail}</p>
-//                     <p class="card-text">預約次數: ${reservationCount}</p>-->
-                    
-                    
-//                 </div>
-//             </div>
-//         `;
-
-//         rankingContainer.append(cardHtml);
-//     }
-// });
-
-  </script>
 
 </body>
 

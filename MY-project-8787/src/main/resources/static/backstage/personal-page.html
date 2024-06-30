@@ -181,40 +181,38 @@
 	<script src="assets/vendor/typed.js/typed.umd.js"></script>
 	<script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
 	<script src="assets/vendor/php-email-form/validate.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 	<!-- Template Main JS File -->
 	<script src="assets/js/main.js"></script>
-<script>
-
-//update user name
+	<script>
+// update user name
 document.addEventListener('DOMContentLoaded', function() {
-        const email = sessionStorage.getItem('userEmail');
-        if (email) {
-            fetch(`/api/user-name?email=${email}`)
-                .then(response => response.text())
-                .then(name => {
-                    if (name) {
-                        document.getElementById('user-name').innerText = `${name}您好`;
-                    } else {
-                        document.getElementById('user-name').innerText = '使用者您好';
-                    }
-                })
-                .catch(error => console.error('Error fetching user name:', error));
-        } else {
-            console.error('No email found in sessionStorage.');
-        }
-    });
-    
+    const email = sessionStorage.getItem('userEmail');
+    if (email) {
+        fetch(`/api/user-name?email=${email}`)
+            .then(response => response.text())
+            .then(name => {
+                if (name) {
+                    document.getElementById('user-name').innerText = `${name}您好`;
+                } else {
+                    document.getElementById('user-name').innerText = '使用者您好';
+                }
+            })
+            .catch(error => console.error('Error fetching user name:', error));
+    } else {
+        console.error('No email found in sessionStorage.');
+    }
+});
+
 document.addEventListener("DOMContentLoaded", function() {
-    
-	  const today = new Date().toISOString().split('T')[0];
-      const minDate = '1920-01-01';
-      document.getElementById('register-birthday').setAttribute('max', today);
-      document.getElementById('register-birthday').setAttribute('min', minDate);
-	
-	// 從會話存儲中讀取電子郵件
+    const today = new Date().toISOString().split('T')[0];
+    const minDate = '1920-01-01';
+    document.getElementById('register-birthday').setAttribute('max', today);
+    document.getElementById('register-birthday').setAttribute('min', minDate);
+
+    // 從會話存儲中讀取電子郵件
     let email = sessionStorage.getItem('userEmail');
-    
 
     if (email) {
         // 獲取用戶資料
@@ -260,11 +258,19 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(error => {
                 console.error('Error fetching user data:', error);
-                alert('獲取用戶資料失敗，請稍後重試');
+                Swal.fire({
+                    icon: 'error',
+                    title: '獲取用戶資料失敗',
+                    text: '請稍後重試'
+                });
             });
     } else {
         console.error('No email found in session storage');
-        alert('未提供電子郵件，請重新登錄');
+        Swal.fire({
+            icon: 'error',
+            title: '未提供電子郵件',
+            text: '請重新登錄'
+        });
     }
 
     // 添加更新資料表單提交事件監聽器
@@ -335,14 +341,22 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(data => {
-            alert('資料更新成功');
+            Swal.fire({
+                icon: 'success',
+                title: '資料更新成功',
+                text: '資料已成功更新'
+            });
             // 更新成功後，將新的電子郵件存儲到會話存儲中
             email = newEmail;
             sessionStorage.setItem('userEmail', newEmail);
         })
         .catch(error => {
             console.error('Error updating user data:', error);
-            alert('更新資料失敗，請稍後重試');
+            Swal.fire({
+                icon: 'error',
+                title: '更新資料失敗',
+                text: '請稍後重試'
+            });
         });
     });
 
@@ -379,8 +393,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const updatedPasswordData = {
             password: password
         };
-        
-
 
         // 發送更新密碼請求到後端
         fetch(`/api/users/${email}/password`, {
@@ -397,11 +409,19 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(data => {
-            alert('密碼更新成功');
+            Swal.fire({
+                icon: 'success',
+                title: '密碼更新成功',
+                text: '密碼已成功更新'
+            });
         })
         .catch(error => {
             console.error('Error updating password:', error);
-            alert('更新密碼失敗，請稍後重試');
+            Swal.fire({
+                icon: 'error',
+                title: '更新密碼失敗',
+                text: '請稍後重試'
+            });
         });
     });
 });

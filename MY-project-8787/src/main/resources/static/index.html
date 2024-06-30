@@ -405,6 +405,8 @@
 	<!-- crypto-js -->
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+	<!-- sweet alert -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<!-- Core theme JS-->
 	<script src="js/scripts.js"></script>
 
@@ -433,7 +435,11 @@
             let valid = true;
 
             if (!genderElement) {
-                alert('請選擇性別');
+                Swal.fire({
+                    icon: 'warning',
+                    title: '警告',
+                    text: '請選擇性別'
+                });
                 valid = false;
             } else {
                 gender = genderElement.value;
@@ -499,82 +505,101 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('註冊成功，請登入');
-                    // Close the modal
-                    const registrationModal = bootstrap.Modal.getInstance(document.getElementById('registrationModal'));
-                    registrationModal.hide();
-                    // Redirect to login section
-                    window.location.href = '/index.html#login';
+                    Swal.fire({
+                        icon: 'success',
+                        title: '成功',
+                        text: '註冊成功，請登入'
+                    }).then(() => {
+                        // Close the modal
+                        const registrationModal = bootstrap.Modal.getInstance(document.getElementById('registrationModal'));
+                        registrationModal.hide();
+                        // Redirect to login section
+                        window.location.href = '/index.html#login';
+                    });
                 } else {
-                    alert(data.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '錯誤',
+                        text: data.message
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '錯誤',
+                    text: '註冊過程中發生錯誤，請稍後重試'
+                });
             });
         });
     });
-            // 確認你引入了 bcryptjs...壞了
-            //if (typeof bcrypt === 'undefined') {
-            //    console.error('bcrypt is not defined');
-            //    return;
-            //}
 
-            //const hashedPassword = bcrypt.hashSync(password, 10);
-            
-            
-    
-    
     // Login ajax
-document.getElementById("loginForm").addEventListener("submit", async function(event) {
-    event.preventDefault(); // Prevent the form from submitting
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+        event.preventDefault(); // Prevent the form from submitting
 
-    const email = document.getElementById('exampleInputEmail1').value;
-    const password = document.getElementById('login-password').value;
+        const email = document.getElementById('exampleInputEmail1').value;
+        const password = document.getElementById('login-password').value;
 
-    // Password validation
-    var passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-    const passwordInput = document.getElementById("login-password");
-    if (!passwordRegex.test(password)) {
-        passwordInput.setCustomValidity("密碼長度至少為8個字符，且包含至少一個數字、一個小寫字母和一個大寫字母");
-        passwordInput.reportValidity();
-        return;
-    } else {
-        passwordInput.setCustomValidity(""); // Clear any previous error message
-    }
-
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: email, password: password })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            alert('登入成功');
-            // 將用戶的電子郵件存儲在本地存儲或會話存儲中
-            sessionStorage.setItem('userEmail', email);
-            // 根據是否是管理員進行跳轉
-            if (data.admin) {
-                window.location.href = '/backstage/admin.html'; // 跳轉到管理員頁面
-            } else {
-                window.location.href = '/backstage/index.html'; // 跳轉到普通用戶頁面
-            }
+        // Password validation
+        var passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+        const passwordInput = document.getElementById("login-password");
+        if (!passwordRegex.test(password)) {
+            passwordInput.setCustomValidity("密碼長度至少為8個字符，且包含至少一個數字、一個小寫字母和一個大寫字母");
+            passwordInput.reportValidity();
+            return;
         } else {
-            alert('登入失敗: ' + data.message);
+            passwordInput.setCustomValidity(""); // Clear any previous error message
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('登入失敗，請稍後重試');
-    }
-});
-        // Add event listener to clear custom validity message when user starts typing
-        document.getElementById("login-password").addEventListener("input", function() {
-            this.setCustomValidity("");
-        });
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email, password: password })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '成功',
+                    text: '登入成功'
+                }).then(() => {
+                    // 將用戶的電子郵件存儲在本地存儲或會話存儲中
+                    sessionStorage.setItem('userEmail', email);
+                    // 根據是否是管理員進行跳轉
+                    if (data.admin) {
+                        window.location.href = '/backstage/admin.html'; // 跳轉到管理員頁面
+                    } else {
+                        window.location.href = '/backstage/index.html'; // 跳轉到普通用戶頁面
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: '錯誤',
+                    text: '登入失敗: ' + data.message
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: '錯誤',
+                text: '登入失敗，請稍後重試'
+            });
+        }
+    });
+
+    // Add event listener to clear custom validity message when user starts typing
+    document.getElementById("login-password").addEventListener("input", function() {
+        this.setCustomValidity("");
+    });
+</script>
     </script>
 </body>
 </html>
