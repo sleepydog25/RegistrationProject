@@ -277,4 +277,12 @@ public class UserController {
     public Map<String, Integer> getUserGenderData() {
         return userService.getUserGenderData();
     }
+
+    // age analysis
+    
+    @GetMapping("/age-data")
+    @ResponseBody
+    public Map<String, Integer> getUserAgeData() {
+        return userService.getUserAgeData();
+    }
 }

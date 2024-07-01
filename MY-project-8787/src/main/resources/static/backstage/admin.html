@@ -280,7 +280,12 @@
 			<div class="container">
 				<h2>使用者資料分析</h2>
 				<div class="mb-3">
-					<div id="gender_chart" style="width: 900px; height: 500px;"></div>
+					<h4>使用者性別分析</h4>
+					<div id="gender_piechart" style="width: 800px; height: 500px;"></div>
+				</div>
+				<div class="mb-3">
+					<h4>使用者年齡分析</h4>
+					<div id="age_barchart" style="width: 800px; height: 500px;"></div>
 				</div>
 			</div>
 		</section>
@@ -300,6 +305,7 @@
 					<h4>借用器具分析</h4>
 					<div id="piechart_material" style="width: 800px; height: 500px;"></div>
 				</div>
+			</div>
 		</section>
 
 
@@ -324,6 +330,8 @@
 	<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
 	<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script type="text/javascript"
+		src="https://www.gstatic.com/charts/loader.js"></script>
 	<!-- Template Main JS File -->
 	<script src="assets/js/main.js"></script>
 
@@ -529,7 +537,7 @@
                 cancelButtonText: '取消'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
+                    $.ajax({ 
                         url: `/api/users/${data.id}`,
                         method: 'DELETE',
                         success: function(response) {
@@ -548,6 +556,235 @@
         });
     });
 </script>
+	<script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawGenderChart);
+
+      function drawGenderChart() {
+        console.log('Attempting to draw gender distribution chart...');
+        const container = document.getElementById('gender_piechart');
+        if (!container) {
+          console.error('Container for gender distribution chart not found!');
+          return;
+        }
+
+        fetch('/api/gender-data')
+          .then(response => response.json())
+          .then(data => {
+            var chartData = [['性別', '百分比']];
+            Object.keys(data).forEach(gender => {
+              chartData.push([gender, data[gender]]);
+            });
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            var options = {
+              title: '',
+              pieHole: 0.4,
+            };
+
+            var chart = new google.visualization.PieChart(container);
+            chart.draw(googleData, options);
+          })
+          .catch(error => {
+            console.error('Error fetching gender data:', error);
+          });
+      }
+    </script>
+
+	<script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        // 從後端獲取數據
+        fetch('/api/reservations/field-usage-frequency')
+          .then(response => response.json())
+          .then(data => {
+            // 準備數據
+            var chartData = [
+              ['場地', '第一', '第二', '第三']
+            ];
+
+            var fieldMapping = {
+              '羽毛球場': ['羽毛球場', 0, 0, 0],
+              '壁球場': ['壁球場', 0, 0, 0],
+              '桌球桌': ['桌球桌', 0, 0, 0],
+              '撞球桌': ['撞球桌', 0, 0, 0]
+            };
+
+            data.forEach(item => {
+              console.log('Processing item:', item);  // 日誌記錄
+              let match = item.field.match(/^(第一|第二|第三)(.*)$/);
+              if (match) {
+                let index;
+                switch (match[1]) {
+                  case '第一':
+                    index = 1;
+                    break;
+                  case '第二':
+                    index = 2;
+                    break;
+                  case '第三':
+                    index = 3;
+                    break;
+                  default:
+                    index = 0;
+                }
+                let field = match[2];
+                if (fieldMapping[field]) {
+                  fieldMapping[field][index] = item.usage_count;
+                } else {
+                  console.error(`Unexpected field type: ${field}`);
+                }
+              } else {
+                console.error(`Unexpected field format: ${item.field}`);
+              }
+            });
+
+            for (let key in fieldMapping) {
+              chartData.push(fieldMapping[key]);
+            }
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            // 設置圖表選項
+            var options = {
+              chart: {
+                title: '',
+                subtitle: '',
+              }
+            };
+
+            // 創建圖表並繪製
+            var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+            chart.draw(googleData, google.charts.Bar.convertOptions(options));
+          })
+          .catch(error => {
+            console.error('Error fetching field usage frequency data:', error);
+          });
+      }
+    </script>
+
+	<script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart', 'bar']});
+
+      // 當Google圖表加載完成時，調用所有的繪製函數
+      google.charts.setOnLoadCallback(drawAllCharts);
+
+      function drawAllCharts() {
+        drawTimeSlotChart();
+        drawEquipmentChart();
+      }
+
+      // 繪製借用時段頻率分析的橫條圖
+      function drawTimeSlotChart() {
+        fetch('/api/reservations/time-slot-usage-frequency')
+          .then(response => response.json())
+          .then(data => {
+            var chartData = [['時段', '借用次數']];
+            const timeSlots = [
+              "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", 
+              "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00",
+              "16:00-17:00", "17:00-18:00", "19:00-20:00", "21:00-22:00"
+            ];
+
+            const usageCountMap = {};
+            data.forEach(item => {
+              usageCountMap[item.time] = item.usage_count;
+            });
+
+            timeSlots.forEach(slot => {
+              chartData.push([slot, usageCountMap[slot] || 0]);
+            });
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            var options = {
+              title: '',
+              subtitle: '',
+              hAxis: {title: '借用次數', minValue: 0},
+              vAxis: {title: '時段'}
+            };
+
+            var chart = new google.visualization.BarChart(document.getElementById('barchart_material'));
+            chart.draw(googleData, options);
+          })
+          .catch(error => {
+            console.error('Error fetching time slot usage frequency data:', error);
+          });
+      }
+
+      // 繪製是否借用球具的圓餅圖
+      function drawEquipmentChart() {
+        fetch('/api/reservations/equipment-usage-statistics')
+          .then(response => response.json())
+          .then(data => {
+            var chartData = [['器具使用頻率', '借用次數']];
+            Object.keys(data).forEach(key => {
+              chartData.push([key, data[key]]);
+            });
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            var options = {
+              title: '',
+              pieHole: 0.4,
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('piechart_material'));
+            chart.draw(googleData, options);
+          })
+          .catch(error => {
+            console.error('Error fetching equipment usage statistics:', error);
+          });
+      }
+    </script>
+
+	<!-- age analysis -->
+	<script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart', 'bar']});
+      google.charts.setOnLoadCallback(drawAgeChart);
+
+      function drawAgeChart() {
+        console.log('Attempting to draw age distribution chart...');
+        const container = document.getElementById('age_barchart');
+        if (!container) {
+          console.error('Container for age distribution chart not found!');
+          return;
+        }
+
+        fetch('/api/age-data')
+          .then(response => response.json())
+          .then(data => {
+            var chartData = [
+              ['年齡分布', '人數'],
+              ['18歲以下', data['18歲以下'] || 0],
+              ['18到25歲', data['18到25歲'] || 0],
+              ['26歲~35歲', data['26歲~35歲'] || 0],
+              ['36歲~45歲', data['36歲~45歲'] || 0],
+              ['46歲~55歲', data['46歲~55歲'] || 0],
+              ['56歲~65歲', data['56歲~65歲'] || 0],
+              ['65歲以上', data['65歲以上'] || 0]
+            ];
+
+            var googleData = google.visualization.arrayToDataTable(chartData);
+
+            var options = {
+              title: '',
+              hAxis: {title: '年齡分布'},
+              vAxis: {title: '人數'}
+            };
+
+            var chart = new google.visualization.ColumnChart(container);
+            chart.draw(googleData, options);
+          })
+          .catch(error => {
+            console.error('Error fetching age data:', error);
+          });
+      }
+    </script>
 
 </body>
 

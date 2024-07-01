@@ -14,7 +14,9 @@ import com.example.demo.modal.dto.UserRankingDto;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +138,55 @@ public class UserService {
         genderData.put("其他", (othersCount * 100) / totalUsers);
 
         return genderData;
+    }
+    
+    public Map<String, Integer> getUserAgeData() {
+        String sql = "SELECT birthday FROM users";
+        List<String> birthdays = jdbcTemplate.queryForList(sql, String.class);
+
+        int under18 = 0;
+        int from18To25 = 0;
+        int from26To35 = 0;
+        int from36To45 = 0;
+        int from46To55 = 0;
+        int from56To65 = 0;
+        int over65 = 0;
+
+        for (String birthday : birthdays) {
+            int age = calculateAge(birthday);
+            if (age < 18) {
+                under18++;
+            } else if (age <= 25) {
+                from18To25++;
+            } else if (age <= 35) {
+                from26To35++;
+            } else if (age <= 45) {
+                from36To45++;
+            } else if (age <= 55) {
+                from46To55++;
+            } else if (age <= 65) {
+                from56To65++;
+            } else {
+                over65++;
+            }
+        }
+
+        Map<String, Integer> ageData = new HashMap<>();
+        ageData.put("18歲以下", under18);
+        ageData.put("18到25歲", from18To25);
+        ageData.put("26歲~35歲", from26To35);
+        ageData.put("36歲~45歲", from36To45);
+        ageData.put("46歲~55歲", from46To55);
+        ageData.put("56歲~65歲", from56To65);
+        ageData.put("65歲以上", over65);
+
+        return ageData;
+    }
+
+    private int calculateAge(String birthday) {
+        LocalDate birthDate = LocalDate.parse(birthday);
+        LocalDate currentDate = LocalDate.now();
+        return Period.between(birthDate, currentDate).getYears();
     }
 
 }
